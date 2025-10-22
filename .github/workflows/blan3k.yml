@@ -1,4 +1,4 @@
-name: WinRDP-Playit (Auto-Restart)
+name: WinRDP-Playit
 
 on:
   workflow_dispatch:
@@ -6,7 +6,6 @@ on:
 jobs:
   rdp-session:
     runs-on: windows-latest
-    timeout-minutes: 360  # أقصى مدة لكل جلسة (6 ساعات)
 
     steps:
     - name: Load Repository
@@ -44,19 +43,3 @@ jobs:
       shell: pwsh
       run: |
         while ($true) { Start-Sleep -Seconds 300 }
-
-    # 🌀 إعادة التشغيل التلقائي بعد انتهاء الجلسة
-    - name: Restart Workflow Automatically
-      if: always()
-      shell: pwsh
-      run: |
-        Write-Host "Restarting workflow automatically..."
-        $headers = @{
-          Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"
-          Accept = "application/vnd.github+json"
-        }
-        $body = @{
-          ref = "${{ github.ref }}"
-        } | ConvertTo-Json
-        $url = "https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/dispatches"
-        Invoke-RestMethod -Method Post -Uri $url -Headers $headers -Body $body
